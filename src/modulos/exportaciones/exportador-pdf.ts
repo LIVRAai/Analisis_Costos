@@ -29,15 +29,15 @@ export async function exportarPdf(proyectoId: string, propuestasSeleccionadas: s
   escribir(`Resumen ejecutivo: ${reporte.resumenEjecutivo}`);
 
   reporte.secciones.forEach((seccion) => {
-    doc.setFont('helvetica', 'bold');
+    doc.setFont(undefined, 'bold');
     escribir(seccion.titulo);
-    doc.setFont('helvetica', 'normal');
+    doc.setFont(undefined, 'normal');
     seccion.contenido.forEach((linea) => escribir(`- ${linea}`));
   });
 
-  doc.setFont('helvetica', 'bold');
+  doc.setFont(undefined, 'bold');
   escribir('Comparativo de propuestas');
-  doc.setFont('helvetica', 'normal');
+  doc.setFont(undefined, 'normal');
   propuestas.forEach((p) => {
     escribir(`${p.nombrePropuesta}: Ahorro mensual ${p.ahorroMensual.toLocaleString('es-CO')}, ahorro anual ${p.ahorroAnual.toLocaleString('es-CO')}, retorno de inversión ${p.retornoInversion === null ? 'No disponible' : `${p.retornoInversion.toFixed(2)} %`}, tiempo de recuperación ${p.tiempoRecuperacion === null ? 'No disponible' : `${p.tiempoRecuperacion.toFixed(2)} meses`}, costo por caso ${p.costoPorCasoProyectado === null ? 'No disponible' : p.costoPorCasoProyectado.toFixed(2)}.`);
   });
