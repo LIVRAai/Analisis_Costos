@@ -5,7 +5,9 @@ export async function exportarPdf(proyectoId: string, propuestasSeleccionadas: s
   const { default: jsPDF } = await import('jspdf');
   const reporte = construirReporteEjecutivo(proyectoId, propuestasSeleccionadas);
   const panel = construirPanelEjecutivoComparativo(proyectoId);
-  const propuestas = panel.propuestas.filter((p) => propuestasSeleccionadas.includes(p.propuestaId));
+  const propuestas = panel.propuestas.filter((p) =>
+    propuestasSeleccionadas.includes(p.propuestaId)
+  );
 
   const doc = new jsPDF();
   let y = 15;
@@ -14,14 +16,18 @@ export async function exportarPdf(proyectoId: string, propuestasSeleccionadas: s
     const lineas = doc.splitTextToSize(texto, 180);
     doc.text(lineas, 15, y);
     y += lineas.length * 6 + (salto - 6);
+
     if (y > 270) {
       doc.addPage();
       y = 15;
     }
   };
 
+  doc.setFont('helvetica', 'bold');
   doc.setFontSize(16);
   escribir('Reporte Ejecutivo Comparativo');
+
+  doc.setFont('helvetica', 'normal');
   doc.setFontSize(11);
   escribir(`Nombre del cliente: ${reporte.nombreCliente}`);
   escribir(`Nombre del proyecto: ${reporte.nombreProyecto}`);
@@ -29,17 +35,37 @@ export async function exportarPdf(proyectoId: string, propuestasSeleccionadas: s
   escribir(`Resumen ejecutivo: ${reporte.resumenEjecutivo}`);
 
   reporte.secciones.forEach((seccion) => {
-    doc.setFont(undefined, 'bold');
+    doc.setFont('helvetica', 'bold');
     escribir(seccion.titulo);
-    doc.setFont(undefined, 'normal');
+
+    doc.setFont('helvetica', 'normal');
     seccion.contenido.forEach((linea) => escribir(`- ${linea}`));
   });
 
-  doc.setFont(undefined, 'bold');
+  doc.setFont('helvetica', 'bold');
   escribir('Comparativo de propuestas');
-  doc.setFont(undefined, 'normal');
+
+  doc.setFont('helvetica', 'normal');
   propuestas.forEach((p) => {
-    escribir(`${p.nombrePropuesta}: Ahorro mensual ${p.ahorroMensual.toLocaleString('es-CO')}, ahorro anual ${p.ahorroAnual.toLocaleString('es-CO')}, retorno de inversión ${p.retornoInversion === null ? 'No disponible' : `${p.retornoInversion.toFixed(2)} %`}, tiempo de recuperación ${p.tiempoRecuperacion === null ? 'No disponible' : `${p.tiempoRecuperacion.toFixed(2)} meses`}, costo por caso ${p.costoPorCasoProyectado === null ? 'No disponible' : p.costoPorCasoProyectado.toFixed(2)}.`);
+    escribir(
+      `${p.nombrePropuesta}: Ahorro mensual ${p.ahorroMensual.toLocaleString(
+        'es-CO'
+      )}, ahorro anual ${p.ahorroAnual.toLocaleString(
+        'es-CO'
+      )}, retorno de inversión ${
+        p.retornoInversion === null
+          ? 'No disponible'
+          : `${p.retornoInversion.toFixed(2)} %`
+      }, tiempo de recuperación ${
+        p.tiempoRecuperacion === null
+          ? 'No disponible'
+          : `${p.tiempoRecuperacion.toFixed(2)} meses`
+      }, costo por caso ${
+        p.costoPorCasoProyectado === null
+          ? 'No disponible'
+          : p.costoPorCasoProyectado.toFixed(2)
+      }.`
+    );
   });
 
   doc.save(`reporte-ejecutivo-${proyectoId}.pdf`);
